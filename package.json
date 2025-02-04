@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up --build"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

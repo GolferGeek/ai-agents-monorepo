@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  simple-node-agent:
+    build: 
+      context: ./agents/basic/simple/node
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+networks:
+  default:
+    name: ai-agents-network
