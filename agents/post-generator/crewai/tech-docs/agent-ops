@@ -1,0 +1,32 @@
+Install the AgentOps SDK
+
+pip install agentops
+
+2
+
+Install Crew with AgentOps
+
+pip install 'crewai[agentops]'
+
+3
+
+Add 2 lines of code
+
+Make sure to call agentops.init before calling any openai, cohere, crew, etc models.
+
+import agentops
+agentops.init(<INSERT YOUR API KEY HERE>)
+
+Set your API key as an .env variable for easy access.
+
+AGENTOPS_API_KEY=<YOUR API KEY>
+
+Read more about environment variables in Advanced Configuration
+4
+
+Run your crew
+
+Execute your program and visit app.agentops.ai/drilldown to observe your Crew! 🕵️
+
+After your run, AgentOps prints a clickable url to console linking directly to your session in the Dashboard
+

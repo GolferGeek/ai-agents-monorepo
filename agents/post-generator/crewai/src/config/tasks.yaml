@@ -1,0 +1,58 @@
+---
+create_outline:
+  description: Analyze {post_idea} and create a detailed outline with main points
+    and subpoints. The outline should provide a clear structure for the expanded content.
+  expected_output: A comprehensive outline document with hierarchical structure, including
+    main sections, subsections, and key points to be covered in each section.
+  async_execution: false
+  agent: outline_architect
+expand_content:
+  description: Transform the outline into full content sections, maintaining {tone_preference}
+    and targeting {target_word_count} words. Ensure smooth transitions between sections
+    and engaging content throughout.
+  expected_output: Fully expanded content following the outline structure, written
+    in the specified tone and meeting the target word count.
+  async_execution: false
+  agent: content_expander
+  context:
+  - create_outline
+generate_counterarguments:
+  description: Review the {perspective} presented in the expanded content and identify
+    potential counterarguments. Create well-reasoned refutations for each counterargument
+    identified.
+  expected_output: A section containing 3-5 main counterarguments and their corresponding
+    refutations, maintaining the same {tone_preference} as the main content.
+  async_execution: false
+  agent: debate_analyst
+  context:
+  - expand_content
+create_illustration_prompt:
+  description: Create a detailed DALL-E prompt for a hand-drawn watercolor illustration
+    that captures the main theme of {post_idea}, incorporating {image_style_preference}.
+  expected_output: A detailed prompt for DALL-E that will generate a watercolor-style
+    illustration capturing the essence of the post's main idea.
+  async_execution: false
+  agent: creative_director
+  context:
+  - expand_content
+generate_illustration:
+  description: Use the approved prompt to generate a watercolor-style illustration
+    using DALL-E that represents the main concept of {post_idea}.
+  expected_output: A watercolor-style digital illustration that effectively represents
+    the main concept of the post.
+  async_execution: false
+  agent: creative_director
+  context:
+  - create_illustration_prompt
+final_review:
+  description: Review all content elements including the main content, refutations,
+    and illustration. Ensure coherence with original {post_idea} and suggest 3-5 engaging
+    titles.
+  expected_output: A final review document with suggested improvements, confirmation
+    of alignment with original concept, and 3-5 title suggestions.
+  async_execution: false
+  agent: content_reviewer
+  context:
+  - expand_content
+  - generate_counterarguments
+  - generate_illustration

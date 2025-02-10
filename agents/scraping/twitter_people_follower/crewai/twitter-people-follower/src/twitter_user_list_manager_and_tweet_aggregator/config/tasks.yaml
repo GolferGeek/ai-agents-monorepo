@@ -1,0 +1,22 @@
+---
+collect_tweets:
+  description: For each username in {twitter_usernames}, navigate to their Twitter
+    profile and collect their three most recent tweets. Include the tweet text, timestamp,
+    and any relevant engagement metrics.
+  expected_output: A collection of the three most recent tweets from each user in
+    {twitter_usernames}, including tweet content, timestamps, and metrics.
+  async_execution: false
+  agent: twitter_scraper
+format_tweets:
+  description: |-
+    Take the collected tweets and format them into a clean, readable string using markdown-style formatting. Format should follow:
+    # @username
+    - Tweet 1 [timestamp]
+    - Tweet 2 [timestamp]
+    - Tweet 3 [timestamp]
+  expected_output: A single formatted string containing all tweets in markdown format,
+    organized by username with proper formatting and structure.
+  async_execution: false
+  agent: content_formatter
+  context:
+  - collect_tweets

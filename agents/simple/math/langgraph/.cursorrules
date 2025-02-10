@@ -1,0 +1,211 @@
+# AI Agents MonoRepo
+
+Every time you choose to apply a rule(s), explicitly state the rule(s) in the output. You can abbreviate the rule description to a single word or phrase.
+
+## Project Context
+This is a monorepo for a collection of AI agents. The agents are built using the following technologies:
+- LangGraph / LangChain with Nodejs and Typescript
+- CrewAI with Python, FastAPI
+- Each agent has its own directory and can be run independently.  Docker is used to containerize the agents.
+    - Each agent will be responsible for its own configuration.
+    - Each agent will have its own README.md file that will contain the necessary information to run the agent.
+    - Each agent will have a .md file that is used by the orchestrator to make decisions on which agent to use.
+        - Purpose of the agent
+        - Inputs
+        - Outputs
+        - Default AI LLM to use
+        - Tags
+
+- There is a docker-compose.yml file in the root of the repo that can be used to start all the agents.
+- There is a docker-compose.dev.yml file in the root of the repo that can be used to start all the agents in development mode.
+- There is a docker-compose.prod.yml file in the root of the repo that can be used to start all the agents in production mode.
+- There is an orchestrator agent that can be used to orchestrate the other agents.
+    - The orchestrator agent is a LangGraph agent that can be used to orchestrate the other agents.
+    - It will be the first agent to be started when the docker-compose.yml file is used to start the agents.
+    - All the other agents will tell the orchestrator agent when they are ready to start.
+
+## Code Style and Structure
+- Write concise, technical TypeScript code with accurate examples
+- Use functional and declarative programming patterns; avoid classes
+- Prefer iteration and modularization over code duplication
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+- Structure repository files as follows:
+```
+agents/
+├── RAG
+│   ├── pdf
+│       ├── langgraph
+|           |-- prompts # all the prompts start here
+|               |-- initial-prompt.md # initial prompt for the agent
+|               |-- agent-prompt.md # prompt for the agent
+|           |-- .agentrules.md
+|           |-- .codingrules.md
+|           |-- agent.md
+|           |-- Dockerfile
+|           |-- package.json
+|           |-- tsconfig.json
+│           ├── index.ts
+│           ├── agent.ts
+│           ├── .gitignore
+│       ├── crewai  
+|           |-- prompts # all the prompts start here
+|               |-- initial-prompt.md # initial prompt for the agent
+|               |-- agent-prompt.md # prompt for the agent
+|           |-- .agentrules.md
+|           |-- .codingrules.md
+|           |-- agent.md
+|           |-- Dockerfile
+|           |-- requirements.txt
+|           |-- tsconfig.json
+│           ├── index.py
+│           ├── agent.py
+│           ├── .gitignore
+├── ReAct
+│   ├── pdf
+│       ├── langgraph
+|           |-- prompts # all the prompts start here
+|               |-- initial-prompt.md # initial prompt for the agent
+|               |-- agent-prompt.md # prompt for the agent
+|           |-- .agentrules.md
+|           |-- .codingrules.md
+|           |-- .agentrules.md
+|           |-- agent.md
+|           |-- Dockerfile
+|           |-- package.json
+|           |-- tsconfig.json
+│           ├── index.ts
+│           ├── agent.ts
+│           ├── .gitignore
+│       ├── crewai  
+|           |-- prompts # all the prompts start here
+|               |-- initial-prompt.md # initial prompt for the agent
+|               |-- agent-prompt.md # prompt for the agent
+|           |-- .agentrules.md
+|           |-- .codingrules.md
+|           |-- agent.md
+|           |-- Dockerfile
+|           |-- requirements.txt
+|           |-- tsconfig.json
+│           ├── index.py
+│           ├── agent.py
+│           ├── .gitignore
+├── Orchestrators
+│   ├── my-ai-assistant
+│       ├── langgraph
+|           |-- prompts # all the prompts start here
+|               |-- initial-prompt.md # initial prompt for the agent
+|               |-- agent-prompt.md # prompt for the agent
+|           |-- .agentrules.md
+|           |-- .codingrules.md
+|           |-- agent.md
+|           |-- Dockerfile
+|           |-- package.json
+|           |-- tsconfig.json
+│           ├── index.ts
+│           ├── agent.ts
+│           ├── .gitignore
+│       ├── crewai  
+|           |-- prompts # all the prompts start here
+|               |-- initial-prompt.md # initial prompt for the agent
+|               |-- agent-prompt.md # prompt for the agent
+|           |-- .agentrules.md
+|           |-- .codingrules.md
+|           |-- agent.md
+|           |-- Dockerfile
+|           |-- requirements.txt
+|           |-- tsconfig.json
+│           ├── index.py
+│           ├── agent.py
+│           ├── .gitignore
+|  more agent types -> sub-type -> tech-type
+|-- docker-compose.yml
+|-- docker-compose.dev.yml
+|-- docker-compose.prod.yml
+|-- orchestrator.py
+|-- .gitignore
+|-- .cursorrules
+|-- agent-ideas.md # ongoing ideas for other agents
+|-- README.md
+```
+
+## Tech Stack
+- Node.js / Express.js
+- FastAPI
+- TypeScript
+- Python
+- LangGraph
+- CrewAI
+- Docker
+
+## Naming Conventions
+- Use lowercase with dashes for directories (e.g., components/form-wizard)
+- Favor named exports for components and utilities
+- Use PascalCase for component files (e.g., VisaForm.tsx)
+- Use camelCase for utility files (e.g., formValidator.ts)
+
+## TypeScript Usage
+- Use TypeScript for all code; prefer interfaces over types
+- Avoid enums; use const objects with 'as const' assertion
+- Use functional components with TypeScript interfaces
+- Define strict types for message passing between different parts of the extension
+- Use absolute imports for all files @/...
+- Avoid try/catch blocks unless there's good reason to translate or handle error in that abstraction
+- Use explicit return types for all functions
+
+## Python Usage
+- Use Python for all code; prefer interfaces over types
+- Avoid enums; use const objects with 'as const' assertion
+- Use functional components with Python interfaces
+- Define strict types for message passing between different parts of the extension
+- Use absolute imports for all files @/...
+
+## Error Handling
+- Implement proper error boundaries
+- Log errors appropriately for debugging
+- Provide user-friendly error messages
+- Handle network failures gracefully
+
+## Testing
+- Write unit tests for utilities and components
+- Implement E2E tests for critical flows
+- Test across different Chrome versions
+- Test memory usage and performance
+
+## Security
+- Implement Content Security Policy
+- Sanitize user inputs
+- Handle sensitive data properly
+- Follow Chrome extension security best practices
+- Implement proper CORS handling
+
+## Git Usage
+Commit Message Prefixes:
+- "fix:" for bug fixes
+- "feat:" for new features
+- "perf:" for performance improvements
+- "docs:" for documentation changes
+- "style:" for formatting changes
+- "refactor:" for code refactoring
+- "test:" for adding missing tests
+- "chore:" for maintenance tasks
+
+Rules:
+- Use lowercase for commit messages
+- Keep the summary line concise
+- Include description for non-obvious changes
+- Reference issue numbers when applicable
+
+## Documentation
+- Maintain clear README with setup instructions
+- Maintain agent.md with the agent's purpose, inputs, outputs, default AI LLM to use, and tags
+- Maintain .agentrules.md with the agent's rules
+- Maintain .codingrules.md with the agent's coding rules
+- Document API interactions and data flows
+- Maintant prompts in the prompts folder
+
+## Development Workflow
+- Use proper version control
+- Implement proper code review process
+- Test in multiple environments
+- Follow semantic versioning for releases
+- Maintain changelog
