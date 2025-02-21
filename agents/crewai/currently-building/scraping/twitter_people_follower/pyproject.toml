@@ -1,0 +1,29 @@
+[project]
+name = "twitter people follower"
+version = "0.1.0"
+description = "twitter using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<=3.14"
+dependencies = [
+    "crewai[tools]>=0.11.0,<0.12.0"
+]
+
+[project.scripts]
+twitter_people_follower = "src.main:run"
+run_crew = "src.main:run"
+train = "src.main:train"
+replay = "src.main:replay"
+test = "src.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"./pyproject.toml" = "pyproject.toml"
+
+[tool.hatch.build.env]
+PYO3_USE_ABI3_FORWARD_COMPATIBILITY = "1"
