@@ -51,8 +51,8 @@ export class LangGraphService {
       
       // Default configuration if none provided
       const config: SearchAgentConfig = searchRequest.config || {
-        provider: 'anthropic',
-        model: 'claude-3-opus-20240229',
+        provider: 'ollama',
+        model: 'llama3.2',
         temperature: 0.7,
         thread_id: executionId
       };

@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { EnvironmentConfig } from 'src/config/configuration';
 import { MemorySaver } from '@langchain/langgraph';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { BaseMessage } from '@langchain/core/messages';
 
 @Injectable()
 export class SimpleSearchAgent {
@@ -50,12 +51,14 @@ export class SimpleSearchAgent {
         return new ChatOllama({
           ...baseConfig,
           temperature: config.temperature,
+          model: config.model || 'llama3.2',
           baseUrl: 'http://localhost:11434',
         });
       default:
         return new ChatOllama({
           ...baseConfig,
           temperature: config.temperature,
+          model: config.model || 'llama3.2',
           baseUrl: 'http://localhost:11434',
         });
     }
@@ -105,11 +108,21 @@ export class SimpleSearchAgent {
       });
 
       console.log('Invoking agent with thread_id:', config.thread_id);
-      const response = await agent.invoke(
-        {messages: [new HumanMessage(searchQuery)]},
-        {configurable: {thread_id: config.thread_id}},
+
+      let response: { messages: BaseMessage[] };
+      try {
+        response = await agent.invoke(
+          {messages: [systemMessage, new HumanMessage(searchQuery)]},
+          {configurable: {thread_id: config.thread_id || 'search-agent'}},
 
       );
+      } catch (error) {
+        response = await agent.invoke(
+            {messages: [new HumanMessage(searchQuery)]},
+            {configurable: {thread_id: config.thread_id || 'search-agent'}},
+  
+        );
+      }
 
       console.log('Response:', response);
       // Return the response content

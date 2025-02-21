@@ -10,6 +10,9 @@ export interface EnvironmentConfig {
   tavily: {
     apiKey: string;
   };
+  agentops: {
+    apiKey: string;
+  };
   pinecone: {
     apiKey?: string;
     indexName?: string;
@@ -41,6 +44,9 @@ export default () => ({
   },
   tavily: {
     apiKey: process.env.TAVILY_API_KEY,
+  },
+  agentops: {
+    apiKey: process.env.AGENTOPS_API_KEY,
   },
   
   // Vector Databases
