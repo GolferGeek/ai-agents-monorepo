@@ -5,7 +5,8 @@ export type AgentCapability =
   | 'result-summarization' 
   | 'code-search'
   | 'data-analysis'
-  | 'text-extraction';
+  | 'text-extraction'
+  | 'conversation-memory';
 
 export interface BaseAgentConfig {
   provider: LLMProvider;
@@ -34,6 +35,7 @@ export function isValidCapability(capability: string): capability is AgentCapabi
     'result-summarization',
     'code-search',
     'data-analysis',
-    'text-extraction'
+    'text-extraction',
+    'conversation-memory'
   ].includes(capability);
 } 
