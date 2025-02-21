@@ -37,6 +37,7 @@ MANIFEST
 env/
 venv/
 ENV/
+**/.venv/
 
 # Node.js
 node_modules/
@@ -103,3 +104,19 @@ out/
 
 # Turbo
 .turbo 
+
+# Large binary files
+*.dmg
+*.iso
+*.tar
+*.gz
+*.zip
+*.dylib
+*.so
+*.node
+
+# Python virtual environments
+**/.venv/
+**/venv/
+**/.env/
+**/env/ 
