@@ -31,19 +31,19 @@ export interface EnvironmentConfig {
   };
 }
 
-export default () => ({
+export default (): EnvironmentConfig => ({
   port: parseInt(process.env.PORT, 10) || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
   
   // API Keys
   openai: {
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY || '',
   },
   anthropic: {
-    apiKey: process.env.ANTHROPIC_API_KEY,
+    apiKey: process.env.ANTHROPIC_API_KEY || '',
   },
   tavily: {
-    apiKey: process.env.TAVILY_API_KEY,
+    apiKey: process.env.TAVILY_API_KEY || '',
   },
   agentops: {
     apiKey: process.env.AGENTOPS_API_KEY,

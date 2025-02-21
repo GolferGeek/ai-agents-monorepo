@@ -10,27 +10,6 @@ import configuration from './config/configuration';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
-      cache: true,
-      expandVariables: true,
-      // Load .env.local if it exists, fallback to .env
-      ignoreEnvFile: false,
-      // Throw an error if .env is missing
-      validate: (config: Record<string, any>) => {
-        const requiredEnvVars = [
-          'PORT',
-          'NODE_ENV',
-          'OPENAI_API_KEY',
-          'ANTHROPIC_API_KEY',
-          'TAVILY_API_KEY'
-        ];
-
-        for (const envVar of requiredEnvVars) {
-          if (!config[envVar]) {
-            throw new Error(`Environment variable ${envVar} is required`);
-          }
-        }
-        return config;
-      },
     }),
     LangGraphModule,
   ],

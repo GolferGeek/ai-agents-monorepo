@@ -1,22 +1,30 @@
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Agent } from '../../decorators/agent.decorator';
+import { SearchRequest, SearchResponse } from './interfaces';
+import { SearchAgentConfig } from './types';
 import { TavilySearchResults } from '@langchain/community/tools/tavily_search';
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatOllama } from '@langchain/ollama';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { SearchAgentConfig } from '../types/search.types';
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EnvironmentConfig } from 'src/config/configuration';
-import { MemorySaver } from '@langchain/langgraph';
+import { EnvironmentConfig } from '../../../config/configuration';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
-import { BaseMessage } from '@langchain/core/messages';
+import { MemorySaver } from '@langchain/langgraph';
 
 @Injectable()
-export class SimpleSearchAgent {
-    agentCheckpointer = new MemorySaver()
-    private readonly openaiApiKey: string;
-    private readonly anthropicApiKey: string;
-    private readonly tavilyApiKey: string;
+@Agent({
+  id: 'simple-search',
+  name: 'Simple Search Agent',
+  description: 'A straightforward agent for performing internet searches and providing concise results',
+  capabilities: ['web-search', 'result-summarization'],
+  providers: ['anthropic', 'openai', 'ollama']
+})
+export class SimpleSearchService {
+  private readonly agentCheckpointer = new MemorySaver();
+  private readonly openaiApiKey: string;
+  private readonly anthropicApiKey: string;
+  private readonly tavilyApiKey: string;
 
   constructor(
     private readonly configService: ConfigService<EnvironmentConfig>,
@@ -26,7 +34,7 @@ export class SimpleSearchAgent {
     this.tavilyApiKey = this.configService.get('tavily').apiKey;
   }
 
-  createChatModel(config: SearchAgentConfig) {
+  private createChatModel(config: SearchAgentConfig) {
     const baseConfig = {
       streaming: false,
       maxRetries: 3,
@@ -51,23 +59,20 @@ export class SimpleSearchAgent {
         return new ChatOllama({
           ...baseConfig,
           temperature: config.temperature,
-          model: config.model || 'llama3.2',
+          model: config.model || 'llama2',
           baseUrl: 'http://localhost:11434',
         });
       default:
         return new ChatOllama({
           ...baseConfig,
           temperature: config.temperature,
-          model: config.model || 'llama3.2',
+          model: config.model || 'llama2',
           baseUrl: 'http://localhost:11434',
         });
     }
   }
 
-  public async runSearchAgent(
-    searchQuery: string,
-    config: SearchAgentConfig,
-  ) {
+  async execute(query: string, config: SearchAgentConfig): Promise<SearchResponse> {
     try {
       // Validate API keys
       if (!this.tavilyApiKey) {
@@ -80,9 +85,7 @@ export class SimpleSearchAgent {
         throw new Error('Anthropic API key is required');
       }
 
-      console.log('Creating search agent with Tavily API key:', this.tavilyApiKey);
-
-      // Define the tools
+      // Create search tool
       const searchTool = new TavilySearchResults({
         maxResults: 3,
         apiKey: this.tavilyApiKey,
@@ -101,38 +104,32 @@ export class SimpleSearchAgent {
         Please provide accurate and up-to-date information based on search results.`,
       });
 
+      // Create the agent
       const agent = createReactAgent({
         llm: model,
         tools: [searchTool],
         checkpointSaver: this.agentCheckpointer,
       });
 
-      console.log('Invoking agent with thread_id:', config.thread_id);
-
-      let response: { messages: BaseMessage[] };
-      try {
-        response = await agent.invoke(
-          {messages: [systemMessage, new HumanMessage(searchQuery)]},
-          {configurable: {thread_id: config.thread_id || 'search-agent'}},
-
+      // Execute the agent
+      const response = await agent.invoke(
+        { messages: [systemMessage, new HumanMessage(query)] },
+        { configurable: { thread_id: config.thread_id } }
       );
-      } catch (error) {
-        response = await agent.invoke(
-            {messages: [new HumanMessage(searchQuery)]},
-            {configurable: {thread_id: config.thread_id || 'search-agent'}},
-  
-        );
-      }
 
-      console.log('Response:', response);
-      // Return the response content
-      return typeof response.messages[response.messages.length - 1].content === 'string'
-        ? response.messages[response.messages.length - 1].content.toString()
-        : JSON.stringify(response.messages[response.messages.length - 1].content.toString());
+      // Extract and return the result
+      const result = response.messages[response.messages.length - 1].content;
+      return {
+        result: typeof result === 'string' ? result : JSON.stringify(result),
+        metadata: {
+          query,
+          timestamp: new Date().toISOString(),
+          provider: config.provider
+        }
+      };
     } catch (error) {
-      console.error('Error in runSearchAgent:', error);
+      console.error('Error in execute:', error);
       throw error;
     }
   }
-}
-
+} 
