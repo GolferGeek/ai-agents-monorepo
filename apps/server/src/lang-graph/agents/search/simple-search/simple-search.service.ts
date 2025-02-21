@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Agent } from '../../decorators/agent.decorator';
+import { Agent } from '../shared/agent.decorator';
 import { SearchRequest, SearchResponse } from './interfaces';
 import { SearchAgentConfig } from './types';
 import { TavilySearchResults } from '@langchain/community/tools/tavily_search';
@@ -8,7 +8,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatOllama } from '@langchain/ollama';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { EnvironmentConfig } from '../../../config/configuration';
+import { EnvironmentConfig } from '../../../../config/configuration';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { MemorySaver } from '@langchain/langgraph';
 

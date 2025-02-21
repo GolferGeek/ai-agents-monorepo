@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { DiscoveryService, MetadataScanner } from '@nestjs/core';
-import { AGENT_METADATA, AgentMetadata } from '../decorators/agent.decorator';
+import { AGENT_METADATA, AgentMetadata } from '../agents/search/shared/agent.decorator';
 
 export interface AgentInfo {
   metadata: AgentMetadata;
