@@ -74,17 +74,6 @@ export class SimpleSearchService {
 
   async execute(query: string, config: SearchAgentConfig): Promise<SearchResponse> {
     try {
-      // Validate API keys
-      if (!this.tavilyApiKey) {
-        throw new Error('Tavily API key is required');
-      }
-      if (config.provider === 'openai' && !this.openaiApiKey) {
-        throw new Error('OpenAI API key is required');
-      }
-      if (config.provider === 'anthropic' && !this.anthropicApiKey) {
-        throw new Error('Anthropic API key is required');
-      }
-
       // Create search tool
       const searchTool = new TavilySearchResults({
         maxResults: 3,

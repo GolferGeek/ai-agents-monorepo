@@ -129,17 +129,6 @@ export class WorkflowSearchService {
 
   async execute(query: string, config: WorkflowSearchConfig): Promise<WorkflowSearchResponse> {
     try {
-      // Validate API keys
-      if (!this.tavilyApiKey) {
-        throw new Error('Tavily API key is required');
-      }
-      if (config.provider === 'openai' && !this.openaiApiKey) {
-        throw new Error('OpenAI API key is required');
-      }
-      if (config.provider === 'anthropic' && !this.anthropicApiKey) {
-        throw new Error('Anthropic API key is required');
-      }
-
       // Get or create conversation state
       const conversationKey = `${config.thread_id}-${config.provider}`;
       let state = this.conversations.get(conversationKey);
