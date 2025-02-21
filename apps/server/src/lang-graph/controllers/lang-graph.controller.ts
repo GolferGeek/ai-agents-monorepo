@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { AgentRegistryService } from '../services/agent-registry.service';
-import { SearchRequest, SearchResponse } from '../agents/simple-search/interfaces';
+import { SearchRequest, SearchResponse } from '../agents/search/simple-search/interfaces';
 
 @Controller('lang-graph')
 export class LangGraphController {
