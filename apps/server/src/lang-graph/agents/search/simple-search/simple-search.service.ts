@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Agent } from '../shared/agent.decorator';
 import { SearchRequest, SearchResponse } from './interfaces';
 import { SearchAgentConfig } from './types';
@@ -8,7 +7,6 @@ import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatOllama } from '@langchain/ollama';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { EnvironmentConfig } from '../../../../config/configuration';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { MemorySaver } from '@langchain/langgraph';
 
@@ -21,17 +19,12 @@ import { MemorySaver } from '@langchain/langgraph';
   providers: ['anthropic', 'openai', 'ollama']
 })
 export class SimpleSearchService {
-  private readonly agentCheckpointer = new MemorySaver();
-  private readonly openaiApiKey: string;
-  private readonly anthropicApiKey: string;
-  private readonly tavilyApiKey: string;
+  private agentCheckpointer = new MemorySaver();
 
-  constructor(
-    private readonly configService: ConfigService<EnvironmentConfig>,
-  ) {
-    this.openaiApiKey = this.configService.get('openai').apiKey;
-    this.anthropicApiKey = this.configService.get('anthropic').apiKey;
-    this.tavilyApiKey = this.configService.get('tavily').apiKey;
+  // Add cleanup method for proper resource management
+  cleanup() {
+    // Reset the checkpointer by creating a new instance
+    this.agentCheckpointer = new MemorySaver();
   }
 
   private createChatModel(config: SearchAgentConfig) {
@@ -46,14 +39,14 @@ export class SimpleSearchService {
           ...baseConfig,
           modelName: config.model || 'gpt-4',
           temperature: config.temperature,
-          openAIApiKey: this.openaiApiKey,
+          openAIApiKey: process.env.OPENAI_API_KEY,
         });
       case 'anthropic':
         return new ChatAnthropic({
           ...baseConfig,
           modelName: config.model || 'claude-3-opus-20240229',
           temperature: config.temperature,
-          anthropicApiKey: this.anthropicApiKey,
+          anthropicApiKey: process.env.ANTHROPIC_API_KEY,
         });
       case 'ollama':
         return new ChatOllama({
@@ -77,7 +70,7 @@ export class SimpleSearchService {
       // Create search tool
       const searchTool = new TavilySearchResults({
         maxResults: 3,
-        apiKey: this.tavilyApiKey,
+        apiKey: process.env.TAVILY_API_KEY,
       });
 
       // Create the model

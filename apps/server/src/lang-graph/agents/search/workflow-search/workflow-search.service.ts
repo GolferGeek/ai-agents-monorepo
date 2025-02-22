@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Agent } from '../shared/agent.decorator';
 import { WorkflowSearchRequest, WorkflowSearchResponse } from './interfaces';
 import { WorkflowSearchConfig } from './types';
@@ -7,8 +6,7 @@ import { TavilySearchResults } from '@langchain/community/tools/tavily_search';
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatOllama } from '@langchain/ollama';
-import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
-import { EnvironmentConfig } from '../../../../config/configuration';
+import { HumanMessage, AIMessage, BaseMessage, SystemMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StateGraph, MessagesAnnotation } from '@langchain/langgraph';
 
@@ -32,20 +30,21 @@ interface ConversationState {
   }
 })
 export class WorkflowSearchService {
-  private readonly openaiApiKey: string;
-  private readonly anthropicApiKey: string;
-  private readonly tavilyApiKey: string;
   private conversations: Map<string, ConversationState> = new Map();
+  private cleanupInterval: NodeJS.Timeout;
 
-  constructor(
-    private readonly configService: ConfigService<EnvironmentConfig>,
-  ) {
-    this.openaiApiKey = this.configService.get('openai').apiKey;
-    this.anthropicApiKey = this.configService.get('anthropic').apiKey;
-    this.tavilyApiKey = this.configService.get('tavily').apiKey;
-
+  constructor() {
     // Clean up old conversations periodically
-    setInterval(() => this.cleanupOldConversations(), 1000 * 60 * 60); // Every hour
+    this.cleanupInterval = setInterval(() => this.cleanupOldConversations(), 1000 * 60 * 60); // Every hour
+    this.cleanupInterval.unref(); // Allow the process to exit even if the interval is still running
+  }
+
+  // Add cleanup method for proper resource management
+  cleanup() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+    }
+    this.conversations.clear();
   }
 
   private cleanupOldConversations() {
@@ -61,15 +60,15 @@ export class WorkflowSearchService {
     switch (config.provider.toLowerCase()) {
       case 'openai':
         return new ChatOpenAI({
-          modelName: config.model || 'gpt-4',
+          modelName: config.model || 'gpt-4-turbo-preview',
           temperature: config.temperature,
-          openAIApiKey: this.openaiApiKey,
+          openAIApiKey: process.env.OPENAI_API_KEY,
         });
       case 'anthropic':
         return new ChatAnthropic({
           modelName: config.model || 'claude-3-opus-20240229',
           temperature: config.temperature,
-          anthropicApiKey: this.anthropicApiKey,
+          anthropicApiKey: process.env.ANTHROPIC_API_KEY,
         });
       case 'ollama':
         return new ChatOllama({
@@ -90,7 +89,7 @@ export class WorkflowSearchService {
     // Define the tools for the agent to use
     const tools = [new TavilySearchResults({ 
       maxResults: config.maxResults || 3,
-      apiKey: this.tavilyApiKey
+      apiKey: process.env.TAVILY_API_KEY
     })];
     const toolNode = new ToolNode(tools);
 
@@ -134,10 +133,14 @@ export class WorkflowSearchService {
       let state = this.conversations.get(conversationKey);
       
       if (!state) {
-        // Initialize new conversation
+        // Initialize new conversation with system message
+        const systemMessage = new SystemMessage(
+          'You are a helpful search assistant that can perform web searches and maintain conversation context. ' +
+          'Use the available tools to search for information when needed.'
+        );
         state = {
           app: this.createWorkflow(config),
-          messages: [],
+          messages: [systemMessage],
           lastUpdated: new Date()
         };
         this.conversations.set(conversationKey, state);
