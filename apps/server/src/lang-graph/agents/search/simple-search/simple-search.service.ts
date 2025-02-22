@@ -31,6 +31,7 @@ export class SimpleSearchService {
     const baseConfig = {
       streaming: false,
       maxRetries: 3,
+      tags: process.env.NODE_ENV === 'test' ? ['test', 'simple-search'] : undefined
     };
 
     switch (config.provider.toLowerCase()) {

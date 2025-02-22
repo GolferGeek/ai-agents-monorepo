@@ -57,29 +57,39 @@ export class WorkflowSearchService {
   }
 
   private createChatModel(config: WorkflowSearchConfig) {
+    const baseConfig = {
+      streaming: false,
+      maxRetries: 3,
+      tags: process.env.NODE_ENV === 'test' ? ['test', 'workflow-search'] : undefined
+    };
+
     switch (config.provider.toLowerCase()) {
       case 'openai':
         return new ChatOpenAI({
+          ...baseConfig,
           modelName: config.model || 'gpt-4-turbo-preview',
           temperature: config.temperature,
           openAIApiKey: process.env.OPENAI_API_KEY,
         });
       case 'anthropic':
         return new ChatAnthropic({
+          ...baseConfig,
           modelName: config.model || 'claude-3-opus-20240229',
           temperature: config.temperature,
           anthropicApiKey: process.env.ANTHROPIC_API_KEY,
         });
       case 'ollama':
         return new ChatOllama({
-          model: config.model || 'llama2',
+          ...baseConfig,
           temperature: config.temperature,
+          model: config.model || 'llama2',
           baseUrl: 'http://localhost:11434',
         });
       default:
         return new ChatOllama({
-          model: config.model || 'llama2',
+          ...baseConfig,
           temperature: config.temperature,
+          model: config.model || 'llama2',
           baseUrl: 'http://localhost:11434',
         });
     }
